@@ -1,0 +1,15 @@
+{
+    "name": "play-substrate-script",
+    "version": "0.0.1",
+    
+    "scripts": {
+      "register-parachain": "ts-node register-parachain.ts"
+    },
+    "dependencies": {
+      "@polkadot/api": "^8.7.1",
+      "@polkadot/types": "^8.7.1",
+      "dotenv": "^16.0.1",
+      "web3": "^1.7.3"
+    }
+  }
+  

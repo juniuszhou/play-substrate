@@ -1,0 +1,11 @@
+session_name: integration
+windows:
+  - windows-name: ganache
+    layout: tiled
+    shell_command_before:
+      - cd ../
+    panes:
+      - shell_command:
+        - ganache-cli -q -i 5777 -p 7545 -m 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
+      - shell_command:
+        - make test
