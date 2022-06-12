@@ -4,8 +4,15 @@ windows:
     layout: tiled
     shell_command_before:
       - cd ../
+      - ./set-log-level.sh
     panes:
       - shell_command:
-        - ganache-cli -q -i 5777 -p 7545 -m 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
+        - ./start-rococo-alice.sh
       - shell_command:
-        - make test
+        - sleep 10
+        - ./start-rococo-bob.sh
+      - shell_command:
+        - sleep 20
+        - para/target/release/parachain-collator --alice --collator --force-authoring --tmp/para --dev --port 30335 --ws-port 9945 --rpc-port 9935 \
+          --execution wasm -- --execution wasm --chain tmp/rococo-local-chain-spec.json --port 30336 --ws-port 9946 --rpc-port 9936 \
+          --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/
