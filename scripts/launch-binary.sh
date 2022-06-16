@@ -11,7 +11,7 @@ PARACHAIN_BIN="../para/target/release/parachain-collator"
 $POLKADOT_BIN build-spec --chain rococo-local --disable-default-bootnode --raw > tmp/rococo-local-chain-spec.json
 
 # export para state and wasm
-$PARACHAIN_BIN export-genesis-state --chain dev > tmp/genesis-state
-$PARACHAIN_BIN export-genesis-wasm --chain dev > tmp/genesis-wasm
+$PARACHAIN_BIN export-genesis-state --chain local > tmp/genesis-state
+$PARACHAIN_BIN export-genesis-wasm --chain local > tmp/genesis-wasm
 
 # 

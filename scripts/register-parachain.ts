@@ -11,7 +11,7 @@ import {
 import { KeyringPair } from "@polkadot/keyring/types";
 import { TypeRegistry } from "@polkadot/types/create";
 
-const PARACHAIN_ID = 2000;
+const PARACHAIN_ID = 1000;
 
 export function signAndSend(
   tx: SubmittableExtrinsic<ApiTypes>,
