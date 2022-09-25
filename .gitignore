@@ -16,3 +16,6 @@ scripts/node_modules
 solo/target
 
 para/target
+
+# binary used by local testing
+bin/

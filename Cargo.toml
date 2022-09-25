@@ -3,6 +3,7 @@ resolver = "2"
 
 members = [
 	"pallets/balances",
+	"pallets/phantom-pallet",
 ]
 
 
