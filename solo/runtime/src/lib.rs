@@ -6,6 +6,8 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use codec::{Decode, Encode, MaxEncodedLen};
+
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -14,7 +16,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify},
+	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify, SaturatedConversion},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
 };
@@ -23,13 +25,18 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
+use frame_system::{
+	limits::BlockWeights,
+	EnsureRoot, EnsureRootWithSuccess, EnsureSigned,
+};
+
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{KeyOwnerProofSystem, Randomness, StorageInfo},
+	traits::{ConstU32, KeyOwnerProofSystem, Randomness, StorageInfo},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-		IdentityFee, Weight,
+		IdentityFee, Weight, ConstantMultiplier, DispatchClass,
 	},
 	StorageValue,
 };
@@ -42,6 +49,7 @@ pub use sp_runtime::{Perbill, Permill};
 
 /// Import the template pallet.
 pub use pallet_template;
+pub use pallet_offchain_worker;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -102,6 +110,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
+	state_version: 1,
 };
 
 /// This determines the average expected block time that we are targeting.
@@ -116,6 +125,10 @@ pub const MILLISECS_PER_BLOCK: u64 = 6000;
 //       Attempting to do so will brick block production.
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 
+const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
+const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND;
+const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
+
 // Time is measured by number of blocks.
 pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
@@ -127,14 +140,29 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
 	pub const BlockHashCount: BlockNumber = 2400;
 	/// We allow for 2 seconds of compute with a 6 second average block time.
-	pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights
-		::with_sensible_defaults(2 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO);
+	pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
+		.base_block(BlockExecutionWeight::get())
+		.for_class(DispatchClass::all(), |weights| {
+			weights.base_extrinsic = ExtrinsicBaseWeight::get();
+		})
+		.for_class(DispatchClass::Normal, |weights| {
+			weights.max_total = Some(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT);
+		})
+		.for_class(DispatchClass::Operational, |weights| {
+			weights.max_total = Some(MAXIMUM_BLOCK_WEIGHT);
+			// Operational transactions have some extra reserved space, so that they
+			// are included even if block reached `MAXIMUM_BLOCK_WEIGHT`.
+			weights.reserved = Some(
+				MAXIMUM_BLOCK_WEIGHT - NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT
+			);
+		})
+		.avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
+		.build_or_panic();
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
 		::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 42;
@@ -146,7 +174,7 @@ impl frame_system::Config for Runtime {
 	/// The basic call filter to use in dispatchable.
 	type BaseCallFilter = frame_support::traits::Everything;
 	/// Block & extrinsics weights: base values and limits.
-	type BlockWeights = BlockWeights;
+	type BlockWeights = RuntimeBlockWeights;
 	/// The maximum length of a block (in bytes).
 	type BlockLength = BlockLength;
 	/// The identifier used to distinguish between accounts.
@@ -191,6 +219,8 @@ impl frame_system::Config for Runtime {
 	type SS58Prefix = SS58Prefix;
 	/// The set code logic, just the default since we're not a parachain.
 	type OnSetCode = ();
+
+	type MaxConsumers = ConstU32<16>;
 }
 
 impl pallet_randomness_collective_flip::Config for Runtime {}
@@ -262,10 +292,12 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
+	type Event = Event;
 	type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
-	type TransactionByteFee = TransactionByteFee;
+	// type TransactionByteFee = TransactionByteFee;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 	type WeightToFee = IdentityFee<Balance>;
+	type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
 	type FeeMultiplierUpdate = ();
 }
 
@@ -277,6 +309,81 @@ impl pallet_sudo::Config for Runtime {
 /// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
 	type Event = Event;
+}
+
+
+impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
+where
+	Call: From<LocalCall>,
+{
+	fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+		call: Call,
+		public: <Signature as sp_runtime::traits::Verify>::Signer,
+		account: AccountId,
+		nonce: Index,
+	) -> Option<(Call, <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload)> {
+		// Some((call, (nonce, ())))
+
+		let tip = 0;
+		// take the biggest period possible.
+		let period =
+			BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2) as u64;
+		let current_block = System::block_number()
+			.saturated_into::<u64>()
+			// The `System::block_number` is initialized with `n+1`,
+			// so the actual block number is `n`.
+			.saturating_sub(1);
+		let era = sp_runtime::generic::Era::mortal(period, current_block);
+		let extra = (
+			frame_system::CheckSpecVersion::<Runtime>::new(),
+			frame_system::CheckTxVersion::<Runtime>::new(),
+			frame_system::CheckGenesis::<Runtime>::new(),
+			frame_system::CheckEra::<Runtime>::from(era),
+			frame_system::CheckNonce::<Runtime>::from(nonce),
+			frame_system::CheckWeight::<Runtime>::new(),
+			// frame_system::CheckNonZeroSender::<Runtime>::new(),
+
+			pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+		);
+		let raw_payload = SignedPayload::new(call, extra)
+			.map_err(|e| {
+				log::warn!("Unable to create signed payload: {:?}", e);
+			})
+			.ok()?;
+		let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
+		let address = account;
+		let (call, extra, _) = raw_payload.deconstruct();
+		Some((call, (sp_runtime::MultiAddress::Id(address), signature, extra)))
+	}
+}
+
+impl frame_system::offchain::SigningTypes for Runtime {
+	type Public = <Signature as sp_runtime::traits::Verify>::Signer;
+	type Signature = Signature;
+}
+
+impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
+where
+	Call: From<C>,
+{
+	type Extrinsic = UncheckedExtrinsic;
+	type OverarchingCall = Call;
+}
+
+parameter_types! {
+	pub const UnsignedPriority: u64 = 1 << 20;
+}
+
+
+
+impl pallet_offchain_worker::Config for Runtime {
+	type Event = Event;
+	type AuthorityId = pallet_offchain_worker::crypto::TestAuthId;
+	type Call = Call;
+	type GracePeriod = ConstU32<5>;
+	type UnsignedInterval = ConstU32<128>;
+	type UnsignedPriority = UnsignedPriority;
+	type MaxPrices = ConstU32<64>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -296,6 +403,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		OffchainWorker: pallet_offchain_worker,
 	}
 );
 
@@ -317,6 +425,8 @@ pub type SignedExtra = (
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+/// The payload being signed in transactions.
+pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,
