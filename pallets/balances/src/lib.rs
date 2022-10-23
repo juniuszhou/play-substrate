@@ -25,6 +25,15 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		/// both constants are from trait Get. 
+		/// const for type not known need get from config
+		#[pallet::constant]
+		type BlockHashCount: Get<Self::BlockNumber>;
+
+		/// type just know it is u16
+		#[pallet::constant]
+		type SS58Prefix: Get<u16>;
 	}
 
 	#[pallet::pallet]
