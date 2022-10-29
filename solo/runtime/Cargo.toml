@@ -17,6 +17,7 @@ substrate-wasm-builder = {version = '5.0.0-dev', git = 'https://github.com/parit
 
 [dependencies]
 # customer pallets
+play-balances = {default-features = false, path = "../../pallets/balances"}
 pallet-offchain-worker = {default-features = false, path = "../../pallets/offchain-worker"}
 pallet-template = {default-features = false, path = '../pallets/template'}
 
