@@ -1,6 +1,7 @@
-use crate as pallet_template;
+use crate as play_balances;
 use frame_support::parameter_types;
 use frame_system as system;
+use frame_support::traits::{ConstU16, ConstU32, ConstU64};
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -18,7 +19,7 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>},
+		PlayBalances: play_balances::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
@@ -28,12 +29,12 @@ parameter_types! {
 }
 
 impl system::Config for Test {
-	type BaseCallFilter = frame_support::traits::AllowAll;
+	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type DbWeight = ();
-	type Origin = Origin;
-	type Call = Call;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeCall = RuntimeCall;
 	type Index = u64;
 	type BlockNumber = u64;
 	type Hash = H256;
@@ -41,8 +42,8 @@ impl system::Config for Test {
 	type AccountId = u64;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = Event;
-	type BlockHashCount = BlockHashCount;
+	type RuntimeEvent = RuntimeEvent;
+	type BlockHashCount = ConstU64<250>;
 	type Version = ();
 	type PalletInfo = PalletInfo;
 	type AccountData = ();
@@ -51,10 +52,15 @@ impl system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = ();
+	type MaxConsumers = ConstU32<16>;
+
 }
 
-impl pallet_template::Config for Test {
-	type Event = Event;
+impl play_balances::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+
+	type BlockHashCount = BlockHashCount;
+	type SS58Prefix = SS58Prefix;
 }
 
 // Build genesis storage according to the mock runtime.

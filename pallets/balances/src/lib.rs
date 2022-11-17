@@ -1,8 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 pub use pallet::*;
 
 #[cfg(test)]
@@ -13,6 +10,9 @@ mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+
+// mod impl_data_type;
+mod impl_system_usage;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -40,22 +40,34 @@ pub mod pallet {
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
 
-	// The pallet's runtime storage items.
-	// https://substrate.dev/docs/en/knowledgebase/runtime/storage
 	#[pallet::storage]
 	#[pallet::getter(fn something)]
-	// Learn more about declaring storage items:
-	// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
 	pub type Something<T> = StorageValue<_, u32>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn some_map)]
-	// Learn more about declaring storage items:
-	// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
-	pub type SomeMap<T: Config> = StorageMap<_, Twox64Concat, u8, u32, OptionQuery, GetDefault,  >;
+	/// Twox64Concat map hash function
+	/// u8 map key 
+	/// u32 map value
+	pub type SomeMap<T: Config> = StorageMap<_, Twox64Concat, u8, u32, OptionQuery, GetDefault>;
 
-	// StorageMap<_, Twox64Concat, T::BlockNumber, T::Hash, ValueQuery>;
+	#[pallet::storage]
+	#[pallet::getter(fn some_value_map)]
+	/// Twox64Concat map hash function
+	/// u8 map key 
+	/// u32 map value
+	pub type QueryMap<T: Config> = StorageMap<_, Twox64Concat, u8, u32, ValueQuery, GetDefault>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn some_double_map)]
+	pub(super) type SomeDoubleMap<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		u32,
+		Blake2_128Concat,
+		u32,
+		u32,
+	>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -135,4 +147,5 @@ pub mod pallet {
 			Ok(())
 		}
 	}
+
 }

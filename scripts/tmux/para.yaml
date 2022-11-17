@@ -16,3 +16,4 @@ windows:
       #   - para/target/release/parachain-collator --alice --collator --force-authoring --tmp/para --dev --port 30335 --ws-port 9945 --rpc-port 9935 \
       #     --execution wasm -- --execution wasm --chain tmp/rococo-local-chain-spec.json --port 30336 --ws-port 9946 --rpc-port 9936 \
       #     --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/
+
