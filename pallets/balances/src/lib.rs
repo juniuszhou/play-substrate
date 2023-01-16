@@ -11,7 +11,7 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-// mod impl_data_type;
+mod impl_data_type;
 mod impl_system_usage;
 
 #[frame_support::pallet]
