@@ -34,6 +34,8 @@ pub mod pallet {
 		/// type just know it is u16
 		#[pallet::constant]
 		type SS58Prefix: Get<u16>;
+
+		const ConstValue: u16;
 	}
 
 	#[pallet::pallet]
@@ -68,6 +70,17 @@ pub mod pallet {
 		u32,
 		u32,
 	>;
+
+	// used to check some parameters of pallet, it is executed when unit test for runtime 
+	// which integrate the pallet, then you can set the parameters correctly when construct runtime
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn integrity_test() {
+			assert!(T::ConstValue > 0_u16, "`BlockHashCount` must ge greater than 0");
+
+			assert!(<T as Config>::BlockHashCount::get() > T::BlockNumber::from(0_u32), "`BlockHashCount` must ge greater than 0");
+		}
+	}
 
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -139,7 +152,7 @@ pub mod pallet {
 		#[pallet::weight(10_000)]
 		pub fn dummy(origin: OriginFor<T>) -> DispatchResult {
 			let _who = ensure_signed(origin)?;
-			let info = T::PalletInfo::index::<Pallet<T>>().unwrap();
+			let _info = T::PalletInfo::index::<Pallet<T>>().unwrap();
 
 			// assert_eq!(PalletInfo::index::<System>().unwrap(), 30);
 
