@@ -56,6 +56,7 @@ impl system::Config for Test {
 
 }
 
+
 impl play_balances::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 

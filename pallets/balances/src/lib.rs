@@ -34,8 +34,6 @@ pub mod pallet {
 		/// type just know it is u16
 		#[pallet::constant]
 		type SS58Prefix: Get<u16>;
-
-		const ConstValue: u16;
 	}
 
 	/// if a pallet without any storage in runtime.
@@ -82,8 +80,6 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn integrity_test() {
-			assert!(T::ConstValue > 0_u16, "`BlockHashCount` must ge greater than 0");
-
 			assert!(<T as Config>::BlockHashCount::get() > T::BlockNumber::from(0_u32), "`BlockHashCount` must ge greater than 0");
 		}
 	}
