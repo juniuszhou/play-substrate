@@ -38,6 +38,12 @@ pub mod pallet {
 		const ConstValue: u16;
 	}
 
+	/// if a pallet without any storage in runtime.
+	/* 	#[pallet::pallet]
+	#[pallet::without_storage_info]
+	pub struct Pallet<T>(PhantomData<T>);
+	*/
+
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);

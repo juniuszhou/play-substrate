@@ -1,9 +1,18 @@
 use super::*;
+use sp_runtime::traits::SaturatedConversion;
 
 impl<T: Config> Pallet<T> {
     pub fn call_block_number() -> T::BlockNumber {
+        // get current block number
         <frame_system::Pallet<T>>::block_number()
     }
+
+    pub fn block_number_ops() {
+        // get block number from u32
+        let _b: T::BlockNumber = T::BlockNumber::from(10_u32);
+        let _u: u32 = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
+    }
+
 }
 
 #[test]
