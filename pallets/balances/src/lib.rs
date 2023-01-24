@@ -14,8 +14,29 @@ mod benchmarking;
 mod impl_data_type;
 mod impl_system_usage;
 
+use frame_support::{
+	print,
+	traits::{
+		Currency, Get, Imbalance, OnUnbalanced,
+		ReservableCurrency, WithdrawReasons,
+	},
+};
+
+
+
+pub type BalanceOf<T> =
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+pub type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
+	<T as frame_system::Config>::AccountId,
+>>::PositiveImbalance;
+pub type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
+	<T as frame_system::Config>::AccountId,
+>>::NegativeImbalance;
+
+
 #[frame_support::pallet]
 pub mod pallet {
+	use super::*;
 	use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::PalletInfo;
@@ -34,6 +55,8 @@ pub mod pallet {
 		/// type just know it is u16
 		#[pallet::constant]
 		type SS58Prefix: Get<u16>;
+
+		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 	}
 
 	/// if a pallet without any storage in runtime.
@@ -157,7 +180,9 @@ pub mod pallet {
 			let _info = T::PalletInfo::index::<Pallet<T>>().unwrap();
 
 			// assert_eq!(PalletInfo::index::<System>().unwrap(), 30);
+			// call print here 
 
+			frame_support::print("Inconsistent state - couldn't settle imbalance for funds spent by treasury");
 
 			Ok(())
 		}

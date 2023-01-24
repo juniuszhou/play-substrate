@@ -20,6 +20,7 @@ frame_support::construct_runtime!(
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		PlayBalances: play_balances::{Pallet, Call, Storage, Event<T>},
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 	}
 );
 
@@ -46,7 +47,7 @@ impl system::Config for Test {
 	type BlockHashCount = ConstU64<250>;
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = ();
+	type AccountData = pallet_balances::AccountData<u64>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
@@ -56,12 +57,24 @@ impl system::Config for Test {
 
 }
 
+impl pallet_balances::Config for Test {
+	type MaxLocks = ();
+	type MaxReserves = ();
+	type ReserveIdentifier = [u8; 8];
+	type Balance = u64;
+	type RuntimeEvent = RuntimeEvent;
+	type DustRemoval = ();
+	type ExistentialDeposit = ConstU64<1>;
+	type AccountStore = System;
+	type WeightInfo = ();
+}
 
 impl play_balances::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 
 	type BlockHashCount = BlockHashCount;
 	type SS58Prefix = SS58Prefix;
+	type Currency = Balances;
 }
 
 // Build genesis storage according to the mock runtime.
