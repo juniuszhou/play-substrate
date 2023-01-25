@@ -3,9 +3,19 @@ use super::*;
 impl<T: Config> Pallet<T> {
     fn dummy_account(who: T::AccountId) {}
 
+    fn value_ops() {
+        match Self::something() {
+            Some(_) => {},
+            None => {}
+        }
+    }
+
     fn map_operation() {
         // insert data
         <SomeMap<T>>::insert(1_u8, 1_u32);
+
+        // get all data from Map
+        let _data: Vec<u32> = <SomeMap<T>>::iter_values().collect();
 
         // update 
         <SomeMap<T>>::mutate(1_u8, |mut data| *data = 
