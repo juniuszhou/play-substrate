@@ -22,8 +22,6 @@ use frame_support::{
 	},
 };
 
-
-
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 pub type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
@@ -32,7 +30,6 @@ pub type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
 pub type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
 	<T as frame_system::Config>::AccountId,
 >>::NegativeImbalance;
-
 
 #[frame_support::pallet]
 pub mod pallet {

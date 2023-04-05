@@ -25,8 +25,8 @@ fn test_basic_value() {
 		match PlayBalances::something() {
 			Some(ref mut value) => {
 				// can't update it even use ref and mut
-				let mut a = 100_u32;
-				*value = a;
+				// let mut a = 100_u32;
+				*value = 100_u32;
 			},
 			None => {}
 		}
