@@ -8,4 +8,6 @@ substrate branch: update to branch = "master"
 
 
 ## run test 
-cargo test --release --package play-balances -- tests::test_codec
+```
+cargo test --release --package play-balances -- --nocapture tests::test_codec
+```
