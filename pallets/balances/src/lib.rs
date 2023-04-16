@@ -18,7 +18,7 @@ use frame_support::{
 	print,
 	traits::{
 		Currency, Get, Imbalance, OnUnbalanced,
-		ReservableCurrency, WithdrawReasons,
+		ReservableCurrency, WithdrawReasons, StorageVersion
 	},
 };
 
@@ -62,8 +62,11 @@ pub mod pallet {
 	pub struct Pallet<T>(PhantomData<T>);
 	*/
 
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(4);
+
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(_);
 
 	#[pallet::storage]
