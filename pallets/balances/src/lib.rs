@@ -1,6 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
+pub mod migrations;
+// pub mod types;
 
 #[cfg(test)]
 mod mock;
@@ -37,6 +39,7 @@ pub mod pallet {
 	use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::PalletInfo;
+	// pub use types::*;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -56,13 +59,29 @@ pub mod pallet {
 		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 	}
 
+	/// how to define origin
+	#[derive(PartialEq, Eq, Clone, Encode, Decode, TypeInfo, RuntimeDebug, MaxEncodedLen)]
+	#[pallet::origin]
+	pub enum Origin {
+		/// Origin one
+		One,
+		/// Origin two
+		Two,
+	}
+
+	impl From<u32> for Origin {
+		fn from(id: u32) -> Origin {
+			Origin::One
+		}
+	}
+
 	/// if a pallet without any storage in runtime.
 	/* 	#[pallet::pallet]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 	*/
 
-	const STORAGE_VERSION: StorageVersion = StorageVersion::new(4);
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -131,6 +150,10 @@ pub mod pallet {
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+
+		
+		
+
 		/// An example dispatchable that takes a singles value as a parameter, writes the value to
 		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
 		#[pallet::weight(10_000)]
@@ -139,6 +162,10 @@ pub mod pallet {
 			// This function will return an error if the extrinsic is not signed.
 			// https://substrate.dev/docs/en/knowledgebase/runtime/origin
 			let who = ensure_signed(origin)?;
+
+
+			// let id: u32 = who.into();
+			// let local_origin: Origin = id.into();
 
 			// Update storage.
 			<Something<T>>::put(something);
@@ -185,6 +212,18 @@ pub mod pallet {
 			frame_support::print("Inconsistent state - couldn't settle imbalance for funds spent by treasury");
 
 			Ok(())
+		}
+	}
+
+	impl<T: Config> Pallet<T> {
+		pub fn account_to_origin(id: T::AccountId) -> Origin {
+			
+			match Some(id) {
+				Some(_) => Origin::One,
+				None => Origin::Two,
+			}
+
+			// Origin::Two
 		}
 	}
 

@@ -5,6 +5,8 @@
 /// <https://docs.substrate.io/v3/runtime/frame>
 pub use pallet::*;
 
+use play_balances::Origin;
+
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
@@ -12,6 +14,7 @@ mod benchmarking;
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use play_balances::Origin;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -64,6 +67,10 @@ pub mod pallet {
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
+
+			// something not implemented 
+			// let b_origin = Origin::One;
+			// let a = ensure_signed(b_origin);
 
 			// Update storage.
 			<Something<T>>::put(something);
