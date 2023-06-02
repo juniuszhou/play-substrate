@@ -15,6 +15,7 @@ mod benchmarking;
 
 mod impl_data_type;
 mod impl_system_usage;
+mod impl_account;
 
 use frame_support::{
 	print,

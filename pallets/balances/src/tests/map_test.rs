@@ -39,4 +39,21 @@ fn test_map() {
 	});
 }
 
+#[test]
+fn test_double_map() {
+	new_test_ext().execute_with(|| {
+		// to get value via pallet instance and the method
+		assert_eq!(PlayBalances::some_double_map(0, 0), None);
 
+		// to get value via data type instance with generic parameter
+		assert_eq!(SomeDoubleMap::<Test>::take(0, 0), None);
+
+		assert_eq!(SomeDoubleMap::<Test>::get(0, 0), None);
+
+		SomeDoubleMap::<Test>::mutate(0, 0, |value| *value = Some(123));
+
+		assert_eq!(SomeDoubleMap::<Test>::get(0, 0).unwrap(), 123);
+
+		
+	});
+}
