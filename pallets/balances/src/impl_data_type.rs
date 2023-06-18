@@ -5,7 +5,7 @@ impl<T: Config> Pallet<T> {
 
     fn value_ops() {
         match Self::something() {
-            Some(_) => {},
+            Some(_) => {}
             None => {}
         }
     }
@@ -17,13 +17,13 @@ impl<T: Config> Pallet<T> {
         // get all data from Map
         let _data: Vec<u32> = <SomeMap<T>>::iter_values().collect();
 
-        // update 
-        <SomeMap<T>>::mutate(1_u8, |mut data| *data = 
-            match data {
-            Some(value) => Some(*value + 1_u32),
-            None => Some(1_u32)
+        // update
+        <SomeMap<T>>::mutate(1_u8, |mut data| {
+            *data = match data {
+                Some(value) => Some(*value + 1_u32),
+                None => Some(1_u32),
             }
-        );
+        });
     }
 
     fn double_map_ops() {
@@ -35,10 +35,10 @@ impl<T: Config> Pallet<T> {
         // insert
         <SomeDoubleMap<T>>::insert(key, key, value);
 
-        // remove 
+        // remove
         <SomeDoubleMap<T>>::remove(key, key);
 
-        // clear with prefix. 
+        // clear with prefix.
         <SomeDoubleMap<T>>::clear_prefix(key, remove_limit, None);
 
         // get all item according to first key
