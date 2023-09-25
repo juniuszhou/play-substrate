@@ -1,11 +1,12 @@
 use crate as pallet_kitties;
 use frame_support::traits::{ConstU16, ConstU64};
 use frame_system as system;
-use pallet_randomness_collective_flip;
+use pallet_insecure_randomness_collective_flip;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
+    BuildStorage,
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -18,9 +19,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-        KittiesModule: pallet_kitties::{Pallet, Call, Storage, Event<T>},
-        Randomness: pallet_randomness_collective_flip::{Pallet, Storage},
+        System: frame_system,
+        KittiesModule: pallet_kitties,
+        Randomness: pallet_insecure_randomness_collective_flip,
     }
 );
 
@@ -29,16 +30,15 @@ impl system::Config for Test {
     type BlockWeights = ();
     type BlockLength = ();
     type DbWeight = ();
-    type Origin = Origin;
-    type Call = Call;
-    type Index = u64;
-    type BlockNumber = u64;
+    type Block = Block;
+    type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeCall = RuntimeCall;
+    type Nonce = u64;
     type Hash = H256;
     type Hashing = BlakeTwo256;
     type AccountId = u64;
     type Lookup = IdentityLookup<Self::AccountId>;
-    type Header = Header;
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
@@ -52,7 +52,7 @@ impl system::Config for Test {
 }
 
 impl pallet_kitties::Config for Test {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type Randomness = Randomness;
 }
 
@@ -60,8 +60,8 @@ impl pallet_insecure_randomness_collective_flip::Config for Test {}
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    system::GenesisConfig::default()
-        .build_storage::<Test>()
+    frame_system::GenesisConfig::<Test>::default()
+        .build_storage()
         .unwrap()
         .into()
 }
