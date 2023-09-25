@@ -6,7 +6,6 @@ homepage = 'https://substrate.dev'
 license = 'Unlicense'
 name = 'play-balances'
 publish = false
-repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
 version = '0.0.1'
 readme = 'README.md'
 
@@ -15,21 +14,22 @@ targets = ['x86_64-unknown-linux-gnu']
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = [
-	"derive",
+    "derive",
 ] }
-scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
-frame-benchmarking = { version = "4.0.0-dev", default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-frame-support = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-frame-system = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-sp-runtime = { version = "6.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-sp-std = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-pallet-balances = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-sp-core = { version = "6.0.0", default-featlures = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
+scale-info = { version = "2.1.1", default-features = false, features = [
+    "derive",
+] }
+frame-benchmarking = { default-features = false, optional = true, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
+frame-support = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
+frame-system = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
+sp-std = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
+pallet-balances = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
+sp-core = { default-featlures = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
 
 
 [dev-dependencies]
-sp-io = { version = "6.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-
+sp-io = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
 
 
 [features]
@@ -46,4 +46,3 @@ std = [
     'sp-core/std',
 ]
 try-runtime = ['frame-support/try-runtime']
-

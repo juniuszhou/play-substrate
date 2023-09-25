@@ -47,7 +47,7 @@ pub mod pallet {
         /// both constants are from trait Get.
         /// const for type not known need get from config
         #[pallet::constant]
-        type BlockHashCount: Get<Self::BlockNumber>;
+        type BlockHashCount: Get<BlockNumberFor<Self>>;
 
         /// type just know it is u16
         #[pallet::constant]
@@ -114,7 +114,7 @@ pub mod pallet {
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn integrity_test() {
             assert!(
-                <T as Config>::BlockHashCount::get() > T::BlockNumber::from(0_u32),
+                <T as Config>::BlockHashCount::get() > BlockNumberFor::<T>::from(0_u32),
                 "`BlockHashCount` must ge greater than 0"
             );
         }

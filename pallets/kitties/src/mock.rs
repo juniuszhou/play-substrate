@@ -56,7 +56,7 @@ impl pallet_kitties::Config for Test {
     type Randomness = Randomness;
 }
 
-impl pallet_randomness_collective_flip::Config for Test {}
+impl pallet_insecure_randomness_collective_flip::Config for Test {}
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
