@@ -29,8 +29,8 @@ sp-core = { default-featlures = false, git = "https://github.com/paritytech/polk
 
 
 [dev-dependencies]
-sp-io = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
-
+sp-io = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
+sp-offchain = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "master" }
 
 [features]
 default = ['std']
